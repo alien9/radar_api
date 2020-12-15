@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="w3-border">
+        <div class="w3-bar w3-theme">
+            <div style="float:right;padding-right:1em;padding-top:0.5em;display:none;" id="control_form">
+                <input type="text" size="4" id="radar" placeholder="código">
+                <input type="text" id="datepicker" autocomplete="off" style="display:none" placeholder="data">
+            </div>
+            <button class="w3-bar-item w3-button testbtn w3-padding-16" onclick="openCity(event,'inicio')" id="inicio-bt">Início</button>
+            <button class="w3-bar-item w3-button testbtn w3-padding-16" onclick="openCity(event,'perfil')" id="perfil-bt">Perfil</button>
+            <button class="w3-bar-item w3-button testbtn w3-padding-16" onclick="openCity(event,'endpoints')" id="report-bt">Endpoints</button>
+            <button class="w3-bar-item w3-button testbtn w3-padding-16" onclick="openCity(event,'locais');map.invalidateSize();loadLocais();" id="locais-bt">Locais</button>
+            <button class="w3-bar-item w3-button testbtn w3-padding-16" onclick="getRid();window.location = '/logout';" id="logout-bt">Sair</button>
+        </div>
+        <div class="city w3-container" id="perfil">
+            <br>
+            <div class="w3-card-4 w3-container">
+                <h2>Seu Perfil</h2>
+                <ul class="w3-ul w3-margin-bottom">
+                  <li>Nome: {{user.first_name}}</li>
+                  <li>Nome de Usuário: {{user.username}}</li>
+                  <li>Token: <span id="token_box">{{token}}</span>
+                    <button class="w3-btn w3-theme" onclick="renew()">Renovar</button>
+                    &nbsp;
+                    <button class="w3-btn w3-theme" onclick="copy()">Copiar</button>
+                  </li>
+                  <textarea id="textarea_copy" style="display:none">{{token}}</textarea>
+                </ul>
+                <br>
+                </div>
+        </div>
+        <div class="city" id="locais">
+            <div id="map"></div>
+        </div>
+        <div class="city w3-container" id="endpoints">
+            <br>
+            <div class="w3-responsive w3-card-4">
+                <table class="w3-table w3-striped w3-bordered">
+                <thead>
+                <tr class="w3-theme">
+                  <th>Método</th>
+                  <th>Parâmetros</th>
+                  <th>Requisição</th>
+                  <th>Resposta</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr class="w3-white">
+                        <td>GetLocais</td>
+                        <td> - </td>
+                        <td>{{hostname}}getLocais/</td>
+                        <td><code>[{"x": longitude, "y": latitude, "lote": numero_do_lote, "id": id, "codigo": [codigo(s)]}, ...]}</code></td>
+                    </tr>
+                    <tr>
+                        <td>GetLocais</td>
+                        <td>Data de Publicação</td>
+                        <td id="get_locais_container">{{hostname}}getLocais/&lt;YYYY-MM-DD&gt;/</td>
+                        <td><code>[{"x": longitude, "y": latitude, "lote": numero_do_lote, "id": id, "codigo": [codigo(s)]}, ...]}</code></td>
+                    </tr>
+                    <tr>
+                        <td>GetDatas</td>
+                        <td> - </td>
+                        <td id="get_datas_container">{{hostname}}getDatas/</td>
+                        <td><code>[{"results": [dd/mm/yyyy, dd/mm/yyyy ... ]}</code></td>
+                    </tr>
+                    <tr>
+                        <td>GetViagens</td>
+                        <td>Data, código</td>
+                        <td id="get_viagens_container">{{hostname}}getViagens/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
+                        <td><code>{"result": [{"id": viagem_id, "inicio": codigo_inicio, "final": codigo_final, "data_inicio": data_inicio, "data_final": data_final, "velocidade_media": velocidade_media(km/h)}, ...]}</code></td>
+                    </tr>   
+                    <tr class="w3-white">
+                        <td>GetTrajetos</td>
+                        <td>Data, código</td>
+                        <td id="get_trajetos_container">{{hostname}}getTrajetos/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
+                        <td><code>{"result": [{"id": trajeto_id, "inicio": codigo_inicio, "final": codigo_final, "data_inicio": data_inicio, "data_final": data_final, "velocidade_media": velocidade_media(km/h)}, ..]}</code></td>
+                    </tr>
+                    <tr>
+                        <td>GetTrajetos</td>
+                        <td> viagem_id </td>
+                        <td id="get_viagens_container">{{hostname}}getViagens/&lt;viagem_id&gt;/</td>
+                        <td><code>{"result": [{"id": viagem_id, "inicio": codigo_inicio, "final": codigo_final, "data_inicio": data_inicio, "data_final": data_final, "velocidade_media": velocidade_media(km/h)}, ...]}</code></td>
+                    </tr>
+                    <tr class="w3-white">
+                        <td>GetDetalhes</td>
+                        <td>Código</td>
+                        <td id="get_detalhes_container">{{hostname}}getDetalhes/&lt;codigo&gt;/</td>
+                        <td><code>{"codigo": codigo, "lote": numero_do_lote, "endereco": endereco, "sentido": sentido, "referencia": referencia, "tipo_equip": tipo_de_equipamento, "enquadramento": enquadramento(s), "faixas": numero_de_faixas, "velocidade": velocidade_estipulada, "velocidade_cam_oni": velocidade_pesados, "velocidade_carro_moto": velocidade_leves, "bairro": bairro, "data_publicacao": inaugurado, "latitude": y, "longitude": x}, ...]}</code></td>
+                    </tr>
+                    <tr>
+                        <td>GetContagens</td>
+                        <td>Código</td>
+                        <td id="get_contagens_container">{{hostname}}getDetalhes/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
+                        <td><code>{"result": [{"codigo": codigo, "faixa": faixa, "tipo": tipo_de_veiculo, "contagem": contagem, "autuacoes": autuacoes, "placas": placas, "data_e_hora": hora_da_contagem}, ... ]}</code></td>
+                    </tr>
+                    <tr class="w3-white">
+                        <td>GetVelocidades</td>
+                        <td>Código</td>
+                        <td id="get_velocidades_container">{{hostname}}getDetalhes/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
+                        <td><code>{"result": [{"velocidade": velocidade(km/h), "tipo": tipo, "data_e_hora": hora}, ... ]}</code></td>
+                    </tr>
+                  </tbody>
+                </table>
+                </div>
+        </div>
+        <div id="inicio" class="w3-container city w3-animate-opacity">
+            <h2></h2>
+            <p>
+                Como iniciativa da política de transparência do Município de São Paulo, que torna acessível a todos(as) os(as) cidadãos(ãs) os dados da gestão de forma clara, objetiva e atualizada, a Prefeitura de São Paulo, por meio das Secretarias de Mobilidade e Transportes e de Inovação e Tecnologia, promoveu a abertura dos dados capturados pelos equipamentos de fiscalização eletrônica (ou radares).
+            </p><p>
+                Atualmente, a cidade de São Paulo dispõe de quase 1.000 equipamentos de fiscalização automática de trânsito, utilizados para o monitoramento do tráfego de veículos. Esses equipamentos são utilizados para fiscalizar infrações de trânsito, garantindo um trânsito mais seguro na cidade. Porém, tendo em vista que os radares registram os veículos independentemente da ocorrência dessas infrações, existe um potencial de uso ainda inexplorado para esses dados. A título de exemplo, esses dados podem ser utilizados para mensurar a velocidade média desenvolvida pelos veículos em determinado segmento de via e também para identificar o volume de veículos que trafegam em diferentes regiões da cidade.
+            </p><p>
+                Com esse entendimento, essas duas Secretarias, juntamente com a Iniciativa Bloomberg para Segurança Global no Trânsito, se uniram para organizar o concurso de projetos “MOBILIZA+SP: Dados de Radares”, que teve por objetivo promover o desenvolvimento de uma ferramenta tecnológica (API) para disponibilização e acesso à base de dados que contém os dados capturados pelos radares da cidade de São Paulo.
+            </p><p>
+                O concurso de projetos para contratação do desenvolvimento da API teve por objeto a solução do seguinte desafio da cidade: “Como organizar os dados obtidos por meio de equipamentos de fiscalização eletrônica de trânsito, no município de São Paulo, e disponibilizá-los para utilização pela Administração Pública e pela comunidade em geral?”
+            </p><p>
+                O desafio foi composto por duas etapas, na primeira houve a seleção e premiação de 3 projetos conceituais durante uma hackathon realizada entre os dias 8 e 10 de novembro de 2019. Na segunda etapa, os 3 vencedores da etapa inicial tiveram a oportunidade de desenvolver a proposta piloto e apresentar um segundo projeto. O grande vencedor da segunda etapa foi contratado pela Prefeitura para desenvolvimento e implementação da solução final, que está sendo utilizada no presente sítio eletrônico.
+            </p><p>
+                Dessa forma, a API dos dados de radar é o resultado final desse importante projeto de abertura de dados da cidade de São Paulo. Por meio da presente API, é possível obter os seguintes dados: (1) localização dos radares; (2) tipo de enquadramento fiscalizado pelo radar; (3) lote da concessão; (4) volume de veículos capturados; (5) tipo de veículo capturado; (6) número de infrações de trânsito; (7) acurácia na identificação das placas; (8) perfil de velocidade capturada pelo equipamento (mínima e máxima); (9) média das velocidades capturadas no ponto; (10) média das velocidades médias desenvolvidas em determinado segmento de via (a partir de dois equipamentos selecionados); (11) número de viagens realiadas entre dois radares; (12) distância entre radares.
+            </p>
+        </div>
+      
+        <div id="galeria" class="w3-container city w3-animate-opacity">
+            <h2>Radartona: Galeria</h2>
+            <div class="w3-content" style="max-width:800px;position:relative">
+                <img class="mySlides w3-animate-opacity" src="/static/images/DSC01262.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01191.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01292.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01268.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01259.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01278.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01266.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01250.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01258.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01284.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01201.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01245.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01254.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01280.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01264.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01230.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01205.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01246.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01216.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01202.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01198.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/IMG_2433.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01285.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01257.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01357.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01240.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01260.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01366.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01353.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01200.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01251.JPG" style="width:100%">
+                <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01274.JPG" style="width:100%">
+      
+                <a class="w3-button w3-hover-dark-grey" style="position:absolute;top:45%;left:0;" onclick="plusDivs(-1)">❮</a>
+                <a class="w3-button w3-hover-dark-grey" style="position:absolute;top:45%;right:0;" onclick="plusDivs(+1)">❯</a>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <!-- Script for Sidebar, Tabs, Accordions, Progress bars and slideshows -->
+    <script>
+        var map;
+        var markers=[];
+        // Side navigation
+        function w3_open() {
+            var x = document.getElementById("mySidebar");
+            x.style.width = "100%";
+            x.style.fontSize = "40px";
+            x.style.paddingTop = "10%";
+            x.style.display = "block";
+        }
+        function w3_close() {
+            document.getElementById("mySidebar").style.display = "none";
+        }
+
+
+        // Accordions
+        function myAccFunc(id) {
+            var x = document.getElementById(id);
+            if (x.className.indexOf("w3-show") == -1) {
+                x.className += " w3-show";
+            } else {
+                x.className = x.className.replace(" w3-show", "");
+            }
+        }
+
+        // Slideshows
+        var slideIndex = 1;
+
+        function plusDivs(n) {
+            slideIndex = slideIndex + n;
+            showDivs(slideIndex);
+        }
+
+        function showDivs(n) {
+            var x = document.getElementsByClassName("mySlides");
+            if (n > x.length) { slideIndex = 1 }
+            if (n < 1) { slideIndex = x.length };
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+            x[slideIndex - 1].style.display = "block";
+        }
+
+        //showDivs(1);
+
+        // Progress Bars
+        function move() {
+            var elem = document.getElementById("myBar");
+            var width = 5;
+            var id = setInterval(frame, 10);
+            function frame() {
+                if (width == 100) {
+                    clearInterval(id);
+                } else {
+                    width++;
+                    elem.style.width = width + '%';
+                    elem.innerHTML = width * 1 + '%';
+                }
+            }
+        }
+        function getRid() {
+            var cookies = document.cookie.split(";");
+            for (var i = 0; i < cookies.length; i++) {
+                var equals = cookies[i].indexOf("=");
+                var name = equals > -1 ? cookies[i].substr(0, equals) : cookies[i];
+                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            }
+        }
+        function loadLocais(){
+            for(var i=0;i<markers.length; i++){
+                map.removeLayer(markers[i]);
+            }
+            markers=[];
+            var jsDate = $('#datepicker').datepicker('getDate');
+            var url='/getLocais';
+            if (jsDate !== null) { // if any date selected in datepicker
+                url+="/"+jsDate.getFullYear()+'-'+(1+jsDate.getMonth())+'-'+jsDate.getDate()+'/';
+            }
+            $.ajax(url, {success:function(data){
+                for(var i=0;i<data.length; i++){
+                    var m=L.marker([data[i].y,data[i].x]);
+                    m.addTo(map);
+                    m.bindPopup(data[i].codigo.join("-"));
+                    markers.push(m);
+                }
+            }});
+
+        }
+        function setUrls(){
+            var d=$('#datepicker').val().split(/\//).reverse().join('-');
+            var e=$("#radar").val();
+            if(d=="") d='&lt;YYYY-MM-DD&gt;';
+            if(e=="") e='&lt;codigo&gt;';
+            $("#get_locais_container").html('{{hostname}}getLocais/'+d+'/');
+            $("#get_trajetos_container").html('{{hostname}}getTrajetos/'+d+'/'+e+'/');
+            $("#get_viagens_container").html('{{hostname}}getViagens/'+d+'/'+e+'/');
+            $("#get_contagens_container").html('{{hostname}}getContagens/'+d+'/'+e+'/');
+            $("#get_detalhes_container").html('{{hostname}}getDetalhes/'+e+'/');
+            $("#get_velocidades_container").html('{{hostname}}getVelocidades/'+d+'/'+e+'/');
+        }
+        $("#datepicker, #radar").change(setUrls);
+        var mybtn = document.getElementsByClassName("testbtn")[0];
+        mybtn.click();
+    </script>
+
+    <script type="text/javascript">
+    $( document ).ready(function() {
+        var ds=[];
+        var DisableDates=function(date){
+            var su = $.datepicker.formatDate('dd/mm/yy', date);
+            return [ds.indexOf(su) != -1];
+        };
+        $.ajax('/getDatas', {success:function(du){
+            ds=du.results;
+            $( "#datepicker" ).show();
+            $( "#datepicker" ).datepicker({
+                clearText: 'Data de operação', clearStatus: '',
+                closeText: 'Fechar', closeStatus: 'Fechar sem modificar',
+                prevText: '<Ant', prevStatus: 'Anterior',
+                nextText: 'Próx>', nextStatus: 'Próximo',
+                currentText: 'Atual', currentStatus: 'Ir ao atual',
+                monthNames: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
+                monthNamesShort: ['Jan','Fev','Mar','Abr','Mai','Jun',
+                'Jul','Ago','Set','Out','Nov','Dez'],
+                monthStatus: 'Mês', yearStatus: 'Ano',
+                weekHeader: 'Sm', weekStatus: '',
+                dayNames: ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'],
+                dayNamesShort: ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],
+                dayNamesMin: ['Do','Se','Te','Qa','Qi','Se','Sa'],
+                dayStatus: 'Domingo é o primeiro doia da semana', dateStatus: 'Escolher data',
+                dateFormat: 'dd/mm/yy', firstDay: 0, 
+                initStatus: 'Escolher data', isRTL: false,changeYear: true,
+                beforeShowDay: DisableDates
+            });
+        }});
+        map = L.map('map').setView([-23.55, -46.6], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        $("#datepicker").change(function(){
+            loadLocais();
+        });
+        $.ajax('/getLocais', {
+            success:function(d){
+                var codes=[];
+                for(var i=0;i<d.length;i++){
+                    codes=codes.concat(d[i].codigo[0].split(/-/));
+                }
+                $( "#radar" ).autocomplete({
+                  source: codes
+                });
+            }
+        });
+
+    });
+    var renewing=false;
+    function renew(){
+        if(renewing)
+            return;
+        renewing=true;
+        $.ajax(
+            '/renew', {success:function(data){
+                $('#token_box').html(data.token);
+                $("#textarea_copy").val(data.token);
+                renewing=false;
+            }}
+        );
+    }
+    function copy(){
+        var copyTextarea = $("#textarea_copy");
+        copyTextarea.show();
+        copyTextarea.focus();
+        copyTextarea.select();
+        try {
+            var successful = document.execCommand('copy');
+            copyTextarea.hide();
+            alert('Copiado: ' + $("#textarea_copy").val());
+        } catch (err) {
+            console.log('Oops, unable to copy');
+            copyTextarea.hide();
+        }
+    }
+    </script>
+{%endblock%}

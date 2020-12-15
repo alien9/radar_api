@@ -1,0 +1,141 @@
+﻿
+#nav {
+    margin-top: 0px;
+    height: auto;
+    width: 100%;
+}
+
+    #nav li {
+        text-align: center;
+        float: right;
+        width: 100%;
+        line-height: 60px;
+        padding-left: 25px;
+        padding-right: 25px;
+    }
+
+        #nav li a {
+            color: rgb(255, 252, 196);
+            font-size: 15px;
+        }
+
+
+    #nav img {
+        border-radius: 50%;
+        float: left;
+        width: 60px;
+        margin-right: 5px;
+    }
+
+#navbarTogglerDemo03 {
+    width: 100%;
+    z-index: 1000;
+    top: 0px;
+    border-radius: 0px 0px 10px 10px;
+}
+
+nav.navbar a {
+    text-decoration: none;
+}
+
+nav.navbar {
+    z-index: 40 !important;
+    width: 100%;
+    top: 0px;
+    left: 0px !important;
+    position: absolute;
+    background: #ffffff00 !important;
+    transition-duration: 500ms;
+}
+
+    nav.navbar:hover {
+        cursor: pointer !important;
+    }
+
+div.quad {
+    z-index: 2;
+    width: 100%;
+    top: 0px;
+    position: absolute;
+    transition-duration: 500ms;
+    height: 100px;
+}
+
+div.quad2 {
+    z-index: 8;
+    width: 100%;
+    top: -100px;
+    position: absolute;
+    background-color: #50505080 !important;
+    transition-duration: 500ms;
+    height: 160px;
+    display: none;
+}
+
+
+footer {
+    margin-top: 100px;
+    overflow: hidden;
+    color: #fff;
+    height: 300px;
+    background-color: #112640;
+}
+
+    footer div p {
+        text-align: center;
+    }
+
+
+    footer div h4 {
+        font-family: 'Montserrat', sans-serif;
+        text-align: center;
+    }
+
+    footer div img {
+        position: relative;
+        margin-top: 50px;
+        left: 50%;
+        margin-left: -50px;
+    }
+
+
+ul.navbar-nav {
+    float: left !important;
+    width: 40%;
+}
+
+a.nav-link {
+    text-align: left;
+    margin-left: 15px;
+    z-index: 30;
+    font-family: 'Quantico', sans-serif;
+    text-transform: capitalize;
+}
+
+div#login a {
+    text-transform: uppercase;
+    z-index: 30;
+    margin: auto;
+    text-align: right;
+    margin-right: 15px;
+    text-decoration: none;
+    font-family: 'Quantico', sans-serif;
+}
+
+.navbar-brand {
+    font-family: 'Audiowide', cursive;
+}
+
+
+html p {
+    font-size: 18px;
+    text-align: justify;
+    line-height: 30px;
+    text-transform: initial;
+    font-family: 'Lato', sans-serif;
+    color: #202020;
+    text-indent: 10px;
+}
+
+
+

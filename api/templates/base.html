@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<title>intra - Dados de Radares - API</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.7.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="/static/css/w3.css">
+<link rel="stylesheet" href="/static/css/w3-theme-black.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/static/leaflet.css" />
+<script type="text/javascript" src="/static/jquery-1.12.4.js"></script>
+<script type="text/javascript" src="/static/jquery-ui.js"></script>
+<script src="/static/leaflet.js"></script>
+<script type="text/javascript">
+    
+    // Tabs
+    function openCity(evt, cityName) {
+        var i;
+        var x = document.getElementsByClassName("city");
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
+        }
+        var activebtn = document.getElementsByClassName("testbtn");
+        for (i = 0; i < activebtn.length; i++) {
+            activebtn[i].className = activebtn[i].className.replace(" w3-dark-grey", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " w3-dark-grey";
+        localStorage.setItem("panel", cityName);
+        $('#control_form').hide();
+        if((cityName=="locais")||(cityName=="endpoints")) $('#control_form').show();
+    }
+
+</script>
+<body>
+    <!-- Header -->
+    <header class="w3-container w3-theme-header w3-padding" id="myHeader" style="background-image: url(/static/images/smt_logo.png);background-repeat: no-repeat;background-position: 40px center;">
+        <div class="w3-center">
+            <h1 class="w3-xxxlarge w3-animate-bottom">Dados de Radares</h1>
+        </div>
+    </header>
+    {% block content %}
+    {% endblock %}
+    {% block scripts %}
+    {% endblock %}
+
+</body>
+</html>

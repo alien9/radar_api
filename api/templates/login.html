@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="w3-border">
+  <div class="w3-bar w3-theme">
+      <button class="w3-bar-item w3-button testbtn w3-padding-16" onclick="openCity(event,'inicio')" id="inicio-bt">Início</button>
+      <button class="w3-bar-item w3-button testbtn w3-padding-16" onclick="openCity(event,'login')" id="login-bt">Entrar</button>
+      <button class="w3-bar-item w3-button testbtn w3-padding-16" onclick="openCity(event,'galeria');" id="galeria-bt">Galeria</button>
+  </div>
+    <br>
+    <div class="city w3-container" id="login">
+      <div class="w3-row-padding">
+          <div class="w3-half">
+          <form class="w3-container w3-card-4" method="POST">{% csrf_token %}
+            <h2>Identificação</h2>
+            <div class="w3-section">      
+              <input class="w3-input" type="text" required="" name="email">
+              <label>email</label>
+            </div>
+            <div class="w3-section">      
+              <input class="w3-input" type="password" required="" name="senha">
+              <label>senha</label>
+            </div>
+            <div class="w3-section">      
+              <button class="w3-btn w3-theme" type="submit">Entrar</button>
+            </div>
+            <div class="w3-section" id="message_board">
+                {{message}}
+            </div>
+            <div class="w3-section">
+              <a href="/signup/">Criar um acesso</a>
+            </div>
+          </form>
+          </div>
+      </div>
+    </div>
+    <br>
+    <div id="inicio" class="w3-container city w3-animate-opacity">
+      <h2></h2>
+      <p>
+          Como iniciativa da política de transparência do Município de São Paulo, que torna acessível a todos(as) os(as) cidadãos(ãs) os dados da gestão de forma clara, objetiva e atualizada, a Prefeitura de São Paulo, por meio das Secretarias de Mobilidade e Transportes e de Inovação e Tecnologia, promoveu a abertura dos dados capturados pelos equipamentos de fiscalização eletrônica (ou radares).
+      </p><p>
+          Atualmente, a cidade de São Paulo dispõe de quase 1.000 equipamentos de fiscalização automática de trânsito, utilizados para o monitoramento do tráfego de veículos. Esses equipamentos são utilizados para fiscalizar infrações de trânsito, garantindo um trânsito mais seguro na cidade. Porém, tendo em vista que os radares registram os veículos independentemente da ocorrência dessas infrações, existe um potencial de uso ainda inexplorado para esses dados. A título de exemplo, esses dados podem ser utilizados para mensurar a velocidade média desenvolvida pelos veículos em determinado segmento de via e também para identificar o volume de veículos que trafegam em diferentes regiões da cidade.
+      </p><p>
+          Com esse entendimento, essas duas Secretarias, juntamente com a Iniciativa Bloomberg para Segurança Global no Trânsito, se uniram para organizar o concurso de projetos “MOBILIZA+SP: Dados de Radares”, que teve por objetivo promover o desenvolvimento de uma ferramenta tecnológica (API) para disponibilização e acesso à base de dados que contém os dados capturados pelos radares da cidade de São Paulo.
+      </p><p>
+          O concurso de projetos para contratação do desenvolvimento da API teve por objeto a solução do seguinte desafio da cidade: “Como organizar os dados obtidos por meio de equipamentos de fiscalização eletrônica de trânsito, no município de São Paulo, e disponibilizá-los para utilização pela Administração Pública e pela comunidade em geral?”
+      </p><p>
+          O desafio foi composto por duas etapas, na primeira houve a seleção e premiação de 3 projetos conceituais durante uma hackathon realizada entre os dias 8 e 10 de novembro de 2019. Na segunda etapa, os 3 vencedores da etapa inicial tiveram a oportunidade de desenvolver a proposta piloto e apresentar um segundo projeto. O grande vencedor da segunda etapa foi contratado pela Prefeitura para desenvolvimento e implementação da solução final, que está sendo utilizada no presente sítio eletrônico.
+      </p><p>
+          Dessa forma, a API dos dados de radar é o resultado final desse importante projeto de abertura de dados da cidade de São Paulo. Por meio da presente API, é possível obter os seguintes dados: (1) localização dos radares; (2) tipo de enquadramento fiscalizado pelo radar; (3) lote da concessão; (4) volume de veículos capturados; (5) tipo de veículo capturado; (6) número de infrações de trânsito; (7) acurácia na identificação das placas; (8) perfil de velocidade capturada pelo equipamento (mínima e máxima); (9) média das velocidades capturadas no ponto; (10) média das velocidades médias desenvolvidas em determinado segmento de via (a partir de dois equipamentos selecionados); (11) número de viagens realiadas entre dois radares; (12) distância entre radares.
+      </p>
+  </div>
+
+  <div id="galeria" class="w3-container city w3-animate-opacity">
+      <h2>Radartona: Galeria</h2>
+      <div class="w3-content" style="max-width:800px;position:relative">
+          <img class="mySlides w3-animate-opacity" src="/static/images/DSC01262.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01191.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01292.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01268.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01259.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01278.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01266.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01250.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01258.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01284.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01201.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01245.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01254.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01280.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01264.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01230.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01205.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01246.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01216.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01202.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01198.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/IMG_2433.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01285.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01257.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01357.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01240.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01260.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01366.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01353.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01200.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01251.JPG" style="width:100%">
+          <br><img class="mySlides w3-animate-opacity" src="/static/images/DSC01274.JPG" style="width:100%">
+
+          <a class="w3-button w3-hover-dark-grey" style="position:absolute;top:45%;left:0;" onclick="plusDivs(-1)">❮</a>
+          <a class="w3-button w3-hover-dark-grey" style="position:absolute;top:45%;right:0;" onclick="plusDivs(+1)">❯</a>
+      </div>
+  </div>
+
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script type="text/javascript">
+$( document ).ready(function() {
+  var mess=localStorage.getItem('message');
+  if(mess && mess.length){
+    $("#message_board").html(mess);
+    localStorage.removeItem('message');
+  }
+  var tab=localStorage.getItem('panel');
+  if(tab){
+    $("#"+tab+'-bt').click();
+  }else{
+    $("#inicio-bt").click();
+  }
+});
+</script>
+{% endblock %}

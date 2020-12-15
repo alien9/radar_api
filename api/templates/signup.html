@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="w3-border">
+    <header class="w3-container w3-blue-grey">
+        <h2>Login</h2>
+    </header>
+    <br>
+    <div class="w3-row-padding">
+        <div class="w3-half">
+        <form class="w3-container w3-card-4" method="POST" id="signupform">{% csrf_token %}
+          <h2>Identificação</h2>
+          <div class="w3-section">      
+            <input class="w3-input" type="text" required="" name="name">
+            <label>nome</label>
+          </div>
+          <div class="w3-section">      
+            <input class="w3-input" type="text" required="" name="email">
+            <label>email</label>
+          </div>
+          <div class="w3-section">      
+            <input class="w3-input" type="password" required="" name="senha">
+            <label>senha</label>
+          </div>
+          <div class="w3-section">      
+            <input class="w3-input" type="password" required="" name="confirmar_senha">
+            <label>confirmar senha</label>
+          </div>
+          <div class="w3-section">
+            <button class="w3-btn w3-theme" type="submit">Entrar</button>
+          </div>
+          <div class="w3-section" id="messagebox">
+              {{message}}
+          </div>
+        </form>
+        </div>
+    </div>
+    <br>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+var sending=false;
+$( document ).ready(function() {
+  $("#signupform").submit(function(e) {
+    e.preventDefault();
+    if(sending)
+      return;
+    sending=true;
+    var form = $(this);
+    var url = form.attr('action');
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: form.serialize(),
+        success: function(data)
+        {
+          if(data.mess){
+            $('#messagebox').html(data.mess);
+          }
+          if(data.status=='200'){
+            document.location='/login';
+          }
+          sending=false;
+        }
+      });
+
+
+    });
+});
+</script>
+{% endblock %}

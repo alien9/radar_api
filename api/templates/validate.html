@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="w3-border">
+    <header class="w3-container w3-blue-grey">
+        <h2>Login</h2>
+    </header>
+    <br>
+    <div class="w3-row-padding">
+        <div class="w3-half">
+        <form class="w3-container w3-card-4" method="POST" id="signupform">{% csrf_token %}
+          <h2>Identificação</h2>
+          <div class="w3-section">      
+              {{message}}
+          </div>
+        </form>
+        </div>
+    </div>
+    <br>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+var username='{{username}}';
+if(username!=''){
+    localStorage.setItem('username',username);
+}
+localStorage.setItem('message','{{message}}');
+document.location='/login/';
+
+</script>
+{% endblock %}
