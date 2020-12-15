@@ -65,7 +65,7 @@ def get_datas(request):
         with connection.cursor() as c:
             c.execute("select distinct timezone('GMT-3'::text, data_e_hora)::date from contagens")
             r=c.fetchall()
-            results=["%s/%s/%s" % (d[0].day, d[0].month, d[0].year) for d in r]
+            results=["%s/%s/%s" % (str(d[0].day).rjust(2,'0'), str(d[0].month).rjust(2,'0'), str(d[0].year).rjust(4,'0')) for d in r]
             cache.set('datas', results)
     return JsonResponse({
         "results":results
