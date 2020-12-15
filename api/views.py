@@ -59,10 +59,14 @@ def renew(request):
 
 def get_datas(request):
     results=cache.get('datas')
+
     if results is None:
-        c=Contagem.objects.distinct('data_e_hora')
-        results=list(set([d.data_e_hora.strftime('%d/%m/%Y') for d in c]))
-        cache.set('datas', results)
+        from django.db import connection
+        with connection.cursor() as c:
+            c.execute("select distinct timezone('GMT-3'::text, data_e_hora)::date from contagens")
+            r=c.fetchall()
+            results=["%s/%s/%s" % (d[0].day, d[0].month, d[0].year) for d in r]
+            cache.set('datas', results)
     return JsonResponse({
         "results":results
     })
