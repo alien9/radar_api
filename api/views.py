@@ -58,10 +58,15 @@ def renew(request):
     return JsonResponse({"mess": "Token criado", "status":"200", "token":token.key})
 
 def get_datas(request):
-    c=Contagem.objects.distinct('data_e_hora')
+    results=cache.get('datas')
+    if results is None:
+        c=Contagem.objects.distinct('data_e_hora')
+        results=list(set([d.data_e_hora.strftime('%d/%m/%Y') for d in c]))
+        cache.set('datas', results)
     return JsonResponse({
-        "results":list(set([d.data_e_hora.strftime('%d/%m/%Y') for d in c]))
+        "results":results
     })
+
 
 def get_locais_por_data(request, d):
     if not request.user.is_authenticated:
