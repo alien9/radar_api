@@ -58,8 +58,9 @@ def renew(request):
     return JsonResponse({"mess": "Token criado", "status":"200", "token":token.key})
 
 def get_datas(request):
+    if 'clear' in request.GET:
+        cache.delete('datas')
     results=cache.get('datas')
-
     if results is None:
         from django.db import connection
         with connection.cursor() as c:
