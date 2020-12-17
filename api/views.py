@@ -62,12 +62,18 @@ def get_datas(request):
         cache.delete('datas')
     results=cache.get('datas')
     if results is None:
+        du=datetime.date(2010,1,1)
+        today=datetime.date.today()
+        results=[]
         from django.db import connection
-        with connection.cursor() as c:
-            c.execute("select distinct timezone('GMT-3'::text, data_e_hora)::date from contagens")
-            r=c.fetchall()
-            results=["%s/%s/%s" % (str(d[0].day).rjust(2,'0'), str(d[0].month).rjust(2,'0'), str(d[0].year).rjust(4,'0')) for d in r]
-            cache.set('datas', results)
+        while du<today:
+            du+=datetime.timedelta(days=1)
+            with connection.cursor() as c:
+                c.execute("select localidade from contagens where timezone('GMT-3'::text, data_e_hora)::date=%s limit 1", (du.strftime('%Y-%m-%d'),))
+                ru=c.fetchone()
+                if ru is not None:
+                    results.append("%s/%s/%s" % (str(du.day).rjust(2,'0'), str(du.month).rjust(2,'0'), str(du.year).rjust(4,'0')))
+        cache.set('datas', results)
     return JsonResponse({
         "results":results
     })
