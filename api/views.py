@@ -163,18 +163,39 @@ def roteirize(p,q):
     from django.db import connection
     with connection.cursor() as c:
         c.execute(
-            "select st_linemerge(st_union(st_union(st_geomfromwkb(%s::geometry), dg),st_geomfromwkb(%s::geometry))) from ("
+            "select m, st_astext(m) from ("
+            "select st_linemerge(st_union(st_union(st_geomfromwkb(%s::geometry), dg),st_geomfromwkb(%s::geometry))) as m from ("
             "select case when st_geometrytype(g)='ST_MultiLineString' then st_geometryn(g, 1) else g end as dg from (select st_linemerge(st_union(s.geom)) as g from "
             "(select seq,path_seq,node,edge,cost,agg_cost from pgr_dijkstra('SELECT gid as id,source, target, st_length(geom) as cost, st_length(geom) as reverse_cost FROM segmento_viario', %s,%s))"
             " a left join segmento_viario s on s.id=a.edge) e"
-            ") f",
+            ") f"
+            ") o",
             (origem[3],destino[3],origem[1], destino[2],)
         )
-        res = c.fetchone();
+
+
+        res = c.fetchone()
         print(res[0])
+        print(res[1])
         print("SRID=4326;POINT(%s %s)" % (p[0], p[1],))
         print("SRID=4326;POINT(%s %s)" % (q[0], q[1],))
-        c.execute("select st_linelocatepoint(st_geomfromwkb(%s::geometry),st_transform(st_geomfromewkt(%s), 31983)) as ini, st_linelocatepoint(st_geomfromwkb(%s::geometry),st_transform(st_geomfromewkt(%s), 31983)) as fim",
+        try:
+            c.execute("select st_linelocatepoint(st_geomfromwkb(%s::geometry),st_transform(st_geomfromewkt(%s), 31983)) as ini, st_linelocatepoint(st_geomfromwkb(%s::geometry),st_transform(st_geomfromewkt(%s), 31983)) as fim",
+                    (res[0], "SRID=4326;POINT(%s %s)" % (p[0], p[1],),res[0],"SRID=4326;POINT(%s %s)" % (q[0],q[1],)),
+                    )
+        except:
+            c.execute(
+                "select m, st_astext(m) from ("
+                "select st_linemerge(dg) as m from ("
+                "select case when st_geometrytype(g)='ST_MultiLineString' then st_geometryn(g, 1) else g end as dg from (select st_linemerge(st_union(s.geom)) as g from "
+                "(select seq,path_seq,node,edge,cost,agg_cost from pgr_dijkstra('SELECT gid as id,source, target, st_length(geom) as cost, st_length(geom) as reverse_cost FROM segmento_viario', %s,%s))"
+                " a left join segmento_viario s on s.id=a.edge) e"
+                ") f"
+                ") o",
+                (origem[1], destino[2],)
+            )
+            res = c.fetchone()
+            c.execute("select st_linelocatepoint(st_geomfromwkb(%s::geometry),st_transform(st_geomfromewkt(%s), 31983)) as ini, st_linelocatepoint(st_geomfromwkb(%s::geometry),st_transform(st_geomfromewkt(%s), 31983)) as fim",
                     (res[0], "SRID=4326;POINT(%s %s)" % (p[0], p[1],),res[0],"SRID=4326;POINT(%s %s)" % (q[0],q[1],)),
                     )
         ps=list(filter(lambda x: x is not None, list(c.fetchone())))
@@ -246,6 +267,7 @@ def get_trajetos(request, codigo, data):
                     r[0].geom=k
                     r[0].save()
                 else:
+                    print("saving route")
                     rt=Route(origem=v.origem, destino=v.destino, geom=k)
                     rt.save()
                 from django.db import connection
