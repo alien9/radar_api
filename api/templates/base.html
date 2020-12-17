@@ -25,7 +25,8 @@
             activebtn[i].className = activebtn[i].className.replace(" w3-dark-grey", "");
         }
         document.getElementById(cityName).style.display = "block";
-        evt.currentTarget.className += " w3-dark-grey";
+        if(evt.currentTarget)
+            evt.currentTarget.className += " w3-dark-grey";
         localStorage.setItem("panel", cityName);
         $('#control_form').hide();
         if((cityName=="locais")||(cityName=="endpoints")) $('#control_form').show();

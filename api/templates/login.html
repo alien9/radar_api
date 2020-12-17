@@ -105,12 +105,7 @@ $( document ).ready(function() {
     $("#message_board").html(mess);
     localStorage.removeItem('message');
   }
-  var tab=localStorage.getItem('panel');
-  if(tab){
-    $("#"+tab+'-bt').click();
-  }else{
-    $("#inicio-bt").click();
-  }
+  $("#inicio-bt").click();
 });
 </script>
 {% endblock %}

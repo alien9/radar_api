@@ -64,4 +64,5 @@ class Route(models.Model):
     origem=models.IntegerField()
     destino=models.IntegerField()
     dist=models.FloatField()
+    geom=g.LineStringField(srid=4326)
     

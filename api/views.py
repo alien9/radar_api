@@ -72,6 +72,12 @@ def get_datas(request):
         "results":results
     })
 
+def get_local(codigo):
+    from django.db import connection
+    with connection.cursor() as c:
+        c.execute("select  st_x(geom), st_y(geom),codigo from base_radares where position(%s in codigo) > 0;",
+                (str(codigo),))
+        return c.fetchone()
 
 def get_locais_por_data(request, d):
     if not request.user.is_authenticated:
@@ -79,7 +85,7 @@ def get_locais_por_data(request, d):
         if user is None:
             return HttpResponse(status=401)
     r = Radar.objects.filter(data_publicacao__lte=d)
-    j=[ {"x":radar.geom.x,"y":radar.geom.y, "lote":radar.lote, "id":radar.id, "codigo":re.split("\s+-?\s+", radar.codigo)} for radar in r ]
+    j=[ {"x":radar.geom.x,"y":radar.geom.y, "lote":radar.lote, "id":radar.id, "codigo":re.split("\s*-\s*", radar.codigo)} for radar in r ]
     return JsonResponse(j, safe=False)
 
 def get_locais(request):
@@ -88,7 +94,7 @@ def get_locais(request):
         if user is None:
             return HttpResponse(status=401)
     r = Radar.objects.all()
-    j=[ {"x":radar.geom.x,"y":radar.geom.y, "lote":radar.lote, "id":radar.id, "codigo":re.split("\s+-?\s+", radar.codigo)} for radar in r ]
+    j=[ {"x":radar.geom.x,"y":radar.geom.y, "lote":radar.lote, "id":radar.id, "codigo":re.split("\s*-\s*", radar.codigo)} for radar in r ]
     return JsonResponse(j, safe=False)
 
 def get_viagens(request, codigo, data):
@@ -139,8 +145,61 @@ def get_trajetos_por_viagem(request, viagem_id):
             t=(v.data_final-v.data_inicio).total_seconds()
             if t > 0:
                 vm=round(float(dist)/float(t)*3.6)
-        res.append({"id":v.id, "inicio":v.origem, "final":v.destino, "data_inicio":v.data_inicio, "data_final":v.data_final, "velocidade_media":vm})
+        res.append({"id":v.id, "inicio":v.origem, "final":v.destino, "data_inicio":v.data_inicio, "data_final":v.data_final, "velocidade_media":vm, "distancia":dist})
     return JsonResponse({"result":res, "total":len(res)})
+
+def roteirize(p,q):
+    if p==q:
+        print("Nothing to do, start equals end")
+        return None
+    origem = reverse_geocode(p[0],p[1])
+    destino=reverse_geocode(q[0],q[1])
+    from django.db import connection
+    with connection.cursor() as c:
+        c.execute(
+            "select st_linemerge(st_union(st_union(st_geomfromwkb(%s::geometry), dg),st_geomfromwkb(%s::geometry))) from ("
+            "select case when st_geometrytype(g)='ST_MultiLineString' then st_geometryn(g, 1) else g end as dg from (select st_linemerge(st_union(s.geom)) as g from "
+            "(select seq,path_seq,node,edge,cost,agg_cost from pgr_dijkstra('SELECT gid as id,source, target, st_length(geom) as cost, st_length(geom) as reverse_cost FROM segmento_viario', %s,%s))"
+            " a left join segmento_viario s on s.id=a.edge) e"
+            ") f",
+            (origem[3],destino[3],origem[1], destino[2],)
+        )
+        res = c.fetchone();
+        print(res[0])
+        print("SRID=4326;POINT(%s %s)" % (p[0], p[1],))
+        print("SRID=4326;POINT(%s %s)" % (q[0], q[1],))
+        c.execute("select st_linelocatepoint(st_geomfromwkb(%s::geometry),st_transform(st_geomfromewkt(%s), 31983)) as ini, st_linelocatepoint(st_geomfromwkb(%s::geometry),st_transform(st_geomfromewkt(%s), 31983)) as fim",
+                    (res[0], "SRID=4326;POINT(%s %s)" % (p[0], p[1],),res[0],"SRID=4326;POINT(%s %s)" % (q[0],q[1],)),
+                    )
+        ps=list(filter(lambda x: x is not None, list(c.fetchone())))
+        print(ps)
+        ps.sort()
+        if len(ps)==0:
+            print("Not found")
+            return None
+        else:
+            c.execute("select g, st_geometrytype(g) from (\
+                select g from (select st_linesubstring(st_geomfromwkb(%s::geometry)\
+                        , %s, %s) as g) h\
+                    )o", (res[0], ps[0], ps[1]))
+
+            res=c.fetchone()
+            if not res[1]=='ST_LineString':
+                return None
+            return res[0]
+
+def reverse_geocode(x,y):
+    from django.db import connection
+    with connection.cursor() as c:
+        c.execute(
+            "select a.gid, a.source, a.target, a.linha from (select gid,source,target,st_linemerge(geom) as linha from segmento_viario order by geom <-> st_transform(ST_GeomFromEWKt(%s),31983) limit 1) as a",
+            ("SRID=4326;POINT(%s %s)"%(x,y),)
+        )
+        print(c.mogrify(
+                "select a.gid, a.source, a.target, a.linha from (select gid,source,target,st_linemerge(geom) as linha from segmento_viario order by geom <-> st_transform(ST_GeomFromEWKt(%s),31983) limit 1) as a",
+            ("SRID=4326;POINT(%s %s)"%(x,y),)
+        ))
+        return c.fetchone()
 
 def get_trajetos(request, codigo, data):
     if not request.user.is_authenticated:
@@ -148,6 +207,7 @@ def get_trajetos(request, codigo, data):
         if user is None:
             return HttpResponse(status=401)
     v=validate_fields(codigo,data)
+
     dt=datetime.datetime(*[int(item) for item in data.split('-')])
     radar=Radar.objects.filter(codigo__contains=codigo)
     if len(radar)==0:
@@ -169,11 +229,29 @@ def get_trajetos(request, codigo, data):
         vm=None
         if len(r)>0:
             dist=r[0].dist
+        
+        if dist is None or (r[0].geom is None and 'recalculate' in request.GET):
+            local_origem=get_local(v.origem)
+            local_destino=get_local(v.destino)
+            if local_origem is not None and local_destino  is not None:
+                k=roteirize(local_origem, local_destino)
+                print(k)
+                if len(r)>0:
+                    r[0].geom=k
+                    r[0].save()
+                else:
+                    rt=Route(origem=v.origem, destino=v.destino, geom=k)
+                    rt.save()
+                from django.db import connection
+                with connection.cursor() as c:
+                    c.execute("update route set dist=st_length(st_transform(geom, 32723)) where origem=%s and destino=%s" % (v.origem, v.destino))
+
+            
         if dist is not None:
             t=(v.data_final-v.data_inicio).total_seconds()
             if t > 0:
                 vm=round(float(dist)/float(t)*3.6)
-        res.append({"id":v.id, "inicio":v.origem, "final":v.destino, "data_inicio":v.data_inicio, "data_final":v.data_final, "velocidade_media":vm})
+            res.append({"id":v.id, "inicio":v.origem, "final":v.destino, "data_inicio":v.data_inicio, "data_final":v.data_final, "velocidade_media":vm, "distancia":dist})
     return JsonResponse({"result":res, "total":len(res)})
 
 def get_velocidades(request, data, codigo):

@@ -46,55 +46,55 @@
                 </thead>
                 <tbody>
                     <tr class="w3-white">
-                        <td>GetLocais</td>
+                        <td>getLocais</td>
                         <td> - </td>
                         <td>{{hostname}}getLocais/</td>
                         <td><code>[{"x": longitude, "y": latitude, "lote": numero_do_lote, "id": id, "codigo": [codigo(s)]}, ...]}</code></td>
                     </tr>
                     <tr>
-                        <td>GetLocais</td>
+                        <td>getLocais</td>
                         <td>Data de Publicação</td>
                         <td id="get_locais_container">{{hostname}}getLocais/&lt;YYYY-MM-DD&gt;/</td>
                         <td><code>[{"x": longitude, "y": latitude, "lote": numero_do_lote, "id": id, "codigo": [codigo(s)]}, ...]}</code></td>
                     </tr>
                     <tr>
-                        <td>GetDatas</td>
+                        <td>getDatas</td>
                         <td> - </td>
                         <td id="get_datas_container">{{hostname}}getDatas/</td>
                         <td><code>[{"results": [dd/mm/yyyy, dd/mm/yyyy ... ]}</code></td>
                     </tr>
                     <tr>
-                        <td>GetViagens</td>
+                        <td>getViagens</td>
                         <td>Data, código</td>
                         <td id="get_viagens_container">{{hostname}}getViagens/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
                         <td><code>{"result": [{"id": viagem_id, "inicio": codigo_inicio, "final": codigo_final, "data_inicio": data_inicio, "data_final": data_final, "velocidade_media": velocidade_media(km/h)}, ...]}</code></td>
                     </tr>   
                     <tr class="w3-white">
-                        <td>GetTrajetos</td>
+                        <td>getTrajetos</td>
                         <td>Data, código</td>
                         <td id="get_trajetos_container">{{hostname}}getTrajetos/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
                         <td><code>{"result": [{"id": trajeto_id, "inicio": codigo_inicio, "final": codigo_final, "data_inicio": data_inicio, "data_final": data_final, "velocidade_media": velocidade_media(km/h)}, ..]}</code></td>
                     </tr>
                     <tr>
-                        <td>GetTrajetos</td>
+                        <td>getTrajetos</td>
                         <td> viagem_id </td>
                         <td id="get_viagens_container">{{hostname}}getViagens/&lt;viagem_id&gt;/</td>
                         <td><code>{"result": [{"id": viagem_id, "inicio": codigo_inicio, "final": codigo_final, "data_inicio": data_inicio, "data_final": data_final, "velocidade_media": velocidade_media(km/h)}, ...]}</code></td>
                     </tr>
                     <tr class="w3-white">
-                        <td>GetDetalhes</td>
+                        <td>getDetalhes</td>
                         <td>Código</td>
                         <td id="get_detalhes_container">{{hostname}}getDetalhes/&lt;codigo&gt;/</td>
                         <td><code>{"codigo": codigo, "lote": numero_do_lote, "endereco": endereco, "sentido": sentido, "referencia": referencia, "tipo_equip": tipo_de_equipamento, "enquadramento": enquadramento(s), "faixas": numero_de_faixas, "velocidade": velocidade_estipulada, "velocidade_cam_oni": velocidade_pesados, "velocidade_carro_moto": velocidade_leves, "bairro": bairro, "data_publicacao": inaugurado, "latitude": y, "longitude": x}, ...]}</code></td>
                     </tr>
                     <tr>
-                        <td>GetContagens</td>
+                        <td>getContagens</td>
                         <td>Código</td>
-                        <td id="get_contagens_container">{{hostname}}getDetalhes/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
+                        <td id="get_contagens_container">{{hostname}}getContagens/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
                         <td><code>{"result": [{"codigo": codigo, "faixa": faixa, "tipo": tipo_de_veiculo, "contagem": contagem, "autuacoes": autuacoes, "placas": placas, "data_e_hora": hora_da_contagem}, ... ]}</code></td>
                     </tr>
                     <tr class="w3-white">
-                        <td>GetVelocidades</td>
+                        <td>getVelocidades</td>
                         <td>Código</td>
                         <td id="get_velocidades_container">{{hostname}}getDetalhes/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
                         <td><code>{"result": [{"velocidade": velocidade(km/h), "tipo": tipo, "data_e_hora": hora}, ... ]}</code></td>
