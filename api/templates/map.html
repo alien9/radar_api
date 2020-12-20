@@ -252,6 +252,14 @@
                     m.bindPopup(data[i].codigo.join("-"));
                     markers.push(m);
                 }
+            },error:function(data){
+                if(data.status==429){
+                    alert("Cota excedida. Aguarde 10 minutos para eecutar novos requests.");
+                }else{
+                    console.log(data);
+                    //window.location = "/login";    
+                }
+                
             }});
 
         }

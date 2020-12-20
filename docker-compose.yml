@@ -1,0 +1,13 @@
+version: '2'
+services:
+  django-api:
+    network_mode: "host"
+    ports:
+      - "4000:4000"
+    volumes:
+      - /home/tiago/works/api/radar/api/static:/var/www/static
+    container_name: django-radartona
+    image: alien9/radartona
+    build:
+      context: .
+      dockerfile: dev.Dockerfile

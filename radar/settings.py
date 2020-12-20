@@ -43,8 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'rest_framework.authtoken',
+    'django.contrib.gis',
     'api',
-
 ]
 
 MIDDLEWARE = [
@@ -55,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'requestlogs.middleware.RequestLogsMiddleware',
 ]
 
 ROOT_URLCONF = 'radar.urls'
@@ -122,6 +123,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'requestlogs.views.exception_handler',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '8000/day',
+        'user': os.environ.get('DAILY_QUOTA', "3000/day"),
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

@@ -14,6 +14,10 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import APIException
 from django.db.models import Q
 import datetime
+from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view, throttle_classes
 
 def validate_fields(codigo,data):
     try:
@@ -93,7 +97,9 @@ def get_locais_por_data(request, d):
     r = Radar.objects.filter(data_publicacao__lte=d)
     j=[ {"x":radar.geom.x,"y":radar.geom.y, "lote":radar.lote, "id":radar.id, "codigo":re.split("\s*-\s*", radar.codigo)} for radar in r ]
     return JsonResponse(j, safe=False)
-
+    
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
 def get_locais(request):
     if not request.user.is_authenticated:
         user=TokenAuthentication().authenticate(request)
@@ -103,6 +109,8 @@ def get_locais(request):
     j=[ {"x":radar.geom.x,"y":radar.geom.y, "lote":radar.lote, "id":radar.id, "codigo":re.split("\s*-\s*", radar.codigo)} for radar in r ]
     return JsonResponse(j, safe=False)
 
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
 def get_viagens(request, codigo, data):
     if not request.user.is_authenticated:
         user=TokenAuthentication().authenticate(request)
@@ -160,6 +168,8 @@ def roteirize(p,q):
         return None
     origem = reverse_geocode(p[0],p[1])
     destino=reverse_geocode(q[0],q[1])
+    if origin is None or destino is None:
+        return None
     from django.db import connection
     with connection.cursor() as c:
         c.execute(
