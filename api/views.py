@@ -34,6 +34,8 @@ def validate_fields(codigo,data):
     if len(radar)==0:
         raise APIException("Erro de validação: Código não existe")
 
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
 def map(request):
     if not request.user.is_authenticated:
         return redirect('%s?next=%s' % ('/login/', request.path))
@@ -49,6 +51,8 @@ def map(request):
         "token": token.key,
     })
 
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
 def renew(request):
     if not request.user.is_authenticated:
         return redirect('%s?next=%s' % ('/login/', request.path))
@@ -61,6 +65,8 @@ def renew(request):
     token.save()
     return JsonResponse({"mess": "Token criado", "status":"200", "token":token.key})
 
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
 def get_datas(request):
     if 'clear' in request.GET:
         cache.delete('datas')
@@ -89,6 +95,8 @@ def get_local(codigo):
                 (str(codigo),))
         return c.fetchone()
 
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
 def get_locais_por_data(request, d):
     if not request.user.is_authenticated:
         user=TokenAuthentication().authenticate(request)
@@ -138,6 +146,8 @@ def get_viagens(request, codigo, data):
     res=[{"id":viagens[c].id, "data_inicio":viagens[c].data_inicio, "data_final":viagens[c].data_final} for c in viagens.keys()]
     return JsonResponse({"result":res, "total":len(res)})
 
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
 def get_trajetos_por_viagem(request, viagem_id):
     if not request.user.is_authenticated:
         user=TokenAuthentication().authenticate(request)
@@ -168,7 +178,7 @@ def roteirize(p,q):
         return None
     origem = reverse_geocode(p[0],p[1])
     destino=reverse_geocode(q[0],q[1])
-    if origin is None or destino is None:
+    if origem is None or destino is None:
         return None
     from django.db import connection
     with connection.cursor() as c:
@@ -232,12 +242,10 @@ def reverse_geocode(x,y):
             "select a.gid, a.source, a.target, a.linha from (select gid,source,target,st_linemerge(geom) as linha from segmento_viario order by geom <-> st_transform(ST_GeomFromEWKt(%s),31983) limit 1) as a",
             ("SRID=4326;POINT(%s %s)"%(x,y),)
         )
-        print(c.mogrify(
-                "select a.gid, a.source, a.target, a.linha from (select gid,source,target,st_linemerge(geom) as linha from segmento_viario order by geom <-> st_transform(ST_GeomFromEWKt(%s),31983) limit 1) as a",
-            ("SRID=4326;POINT(%s %s)"%(x,y),)
-        ))
         return c.fetchone()
 
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
 def get_trajetos(request, codigo, data):
     if not request.user.is_authenticated:
         user=TokenAuthentication().authenticate(request)
@@ -292,6 +300,8 @@ def get_trajetos(request, codigo, data):
             res.append({"id":v.id, "inicio":v.origem, "final":v.destino, "data_inicio":v.data_inicio, "data_final":v.data_final, "velocidade_media":vm, "distancia":dist})
     return JsonResponse({"result":res, "total":len(res)})
 
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
 def get_velocidades(request, data, codigo):
     if not request.user.is_authenticated:
         user=TokenAuthentication().authenticate(request)
@@ -361,7 +371,9 @@ def get_detalhes(request, codigo):
         "longitude":r.geom.x
     }
     return JsonResponse(res)
-  
+
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])  
 def get_contagens(request, data, codigo):
     if not request.user.is_authenticated:
         user=TokenAuthentication().authenticate(request)
@@ -403,6 +415,8 @@ def api_logout(request):
     logout(request)
     return redirect('/')
 
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
 def signup(request):
     if request.method=='GET':
         return render(request, 'signup.html')
@@ -431,7 +445,9 @@ def signup(request):
         msg.attach_alternative(html, "text/html")
         msg.send()
         return JsonResponse({"mess": "Usuário criado", "status":"200"})
-    
+
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
 def validate(request, signup_token):
     uid=cache.get("validator_%s" % (signup_token,))
     if uid is None:
