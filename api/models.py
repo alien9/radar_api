@@ -6,21 +6,21 @@ class Radar(models.Model):
     class Meta:
         verbose_name="Sensor"
         db_table = "base_radares"
-    lote=models.IntegerField()
+    lote=models.IntegerField(null=True)
     codigo=models.TextField(max_length=50)
-    endereco=models.TextField(max_length=400)
-    sentido=models.TextField(max_length=200)
-    referencia=models.TextField(max_length=100)
-    tipo_equip=models.TextField(max_length=50)
-    enquadrame=models.TextField(max_length=20)
-    qtde_fxs_f=models.IntegerField()
-    data_publi=models.TextField(max_length=50)
-    velocidade=models.TextField(max_length=30)
+    endereco=models.TextField(max_length=400,null=True)
+    sentido=models.TextField(max_length=200,null=True)
+    referencia=models.TextField(max_length=100,null=True)
+    tipo_equip=models.TextField(max_length=50,null=True)
+    enquadrame=models.TextField(max_length=20,null=True)
+    qtde_fxs_f=models.IntegerField(null=True)
+    data_publi=models.TextField(max_length=50,null=True)
+    velocidade=models.TextField(max_length=30,null=True)
     geom=g.PointField(srid=4326)
-    bairro=models.TextField(max_length=300)
-    velocidade_cam_oni=models.IntegerField()
-    velocidade_carro_moto=models.IntegerField()
-    data_publicacao=models.DateField()
+    bairro=models.TextField(max_length=300,null=True)
+    velocidade_cam_oni=models.IntegerField(null=True)
+    velocidade_carro_moto=models.IntegerField(null=True)
+    data_publicacao=models.DateField(null=True)
 
 class Viagem(models.Model):
     class Meta:
