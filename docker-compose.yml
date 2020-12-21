@@ -16,7 +16,7 @@ services:
     ports:
       - "4000:4000"
     volumes:
-      - /home/tiago/works/api/radar/api/static:/var/www/static
+      - ./api/static:/var/www/static
     container_name: django-radartona
     image: alien9/radartona
     build:
