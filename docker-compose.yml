@@ -6,6 +6,7 @@ services:
       - HOST_URL=${HOST_URL}
       - DJANGO_ENV=${DJANGO_ENV}
       - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
       - DB_NAME=${DB_NAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - STATIC_ROOT=${STATIC_ROOT}
