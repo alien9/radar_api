@@ -91,11 +91,11 @@ CACHES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get('DRIVER_DB_NAME', 'radartona1'),
-        'HOST': os.environ.get('DRIVER_DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DRIVER_DB_PORT', 5432),
-        'USER': os.environ.get('DRIVER_DB_USER', 'driver'),
-        'PASSWORD': os.environ.get('DRIVER_DB_PASSWORD', 'driver'),
+        'NAME': os.environ.get('DB_NAME', 'radartona1'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', 5432),
+        'USER': os.environ.get('DB_USER', 'driver'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'driver'),
         'CONN_MAX_AGE': 3600,  # in seconds
         'OPTIONS': {
         #    'sslmode': 'require'

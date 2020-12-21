@@ -1,6 +1,16 @@
 version: '2'
 services:
   django-api:
+    environment:
+      - HOSTNAME=${HOSTNAME}
+      - HOST_URL=${HOST_URL}
+      - DJANGO_ENV=${DJANGO_ENV}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - STATIC_ROOT=${STATIC_ROOT}
+      - STATIC_URL=${STATIC_URL}
+      - QUOTA=${QUOTA}
     network_mode: "host"
     ports:
       - "4000:4000"
@@ -10,4 +20,4 @@ services:
     image: alien9/radartona
     build:
       context: .
-      dockerfile: dev.Dockerfile
+#      dockerfile: dev.Dockerfile
