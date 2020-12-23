@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.gis.db import models as g
+from django.db.models.signals import pre_save, post_save
+from django.core.cache import cache
+from django.dispatch import receiver
 
 # Create your models here.
 class Radar(models.Model):
@@ -21,6 +24,10 @@ class Radar(models.Model):
     velocidade_cam_oni=models.IntegerField(null=True)
     velocidade_carro_moto=models.IntegerField(null=True)
     data_publicacao=models.DateField(null=True)
+
+@receiver(post_save, sender=Radar)
+def record_after_save(sender, instance, **kwargs):
+    cache.delete('datas')
 
 class Viagem(models.Model):
     class Meta:

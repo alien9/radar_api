@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'radar.wsgi.application'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
+        'LOCATION': "%s:11211" % (os.environ.get('MEMCACHE', '127.0.0.1')),
     }
 }
 

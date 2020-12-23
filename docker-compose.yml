@@ -1,5 +1,8 @@
 version: '2'
 services:
+  memcached:
+    image: bitnami/memcached
+    network_mode: "host"
   django-api:
     environment:
       - HOSTNAME=${HOSTNAME}
@@ -21,4 +24,3 @@ services:
     image: alien9/radartona
     build:
       context: .
-#      dockerfile: dev.Dockerfile

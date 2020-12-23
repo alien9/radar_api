@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     libgeos-dev \
     libspatialindex-dev \
     gdal-bin \
-    postgis
+    memcached
 
 RUN ["gdal-config", "--version"]
 
