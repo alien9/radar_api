@@ -37,7 +37,7 @@ class Viagem(models.Model):
     data_inicio=models.DateTimeField()
     final=models.IntegerField()
     data_final=models.DateTimeField()
-    tipo=models.IntegerField()
+    tipo=models.IntegerField(null=True)
 
 class Trajeto(models.Model):
     class Meta:
