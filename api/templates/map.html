@@ -65,27 +65,27 @@
                     </tr>
                     <tr>
                         <td>getViagens</td>
-                        <td>Data, código</td>
-                        <td id="get_viagens_container">{{hostname}}getViagens/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
+                        <td>Data, hora, código</td>
+                        <td id="get_viagens_container">{{hostname}}getViagens/&lt;YYYY-MM-DD&gt;/&lt;hora&gt;/&lt;codigo&gt;/</td>
                         <td><code>{"result": [{"id": viagem_id, "inicio": codigo_inicio, "final": codigo_final, "data_inicio": data_inicio, "data_final": data_final, "velocidade_media": velocidade_media(km/h)}, ...]}</code></td>
                     </tr>   
                     <tr class="w3-white">
                         <td>getTrajetos</td>
-                        <td>Data, código</td>
-                        <td id="get_trajetos_container">{{hostname}}getTrajetos/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
+                        <td>Data, hora, código</td>
+                        <td id="get_trajetos_container">{{hostname}}getTrajetos/&lt;YYYY-MM-DD&gt;/&lt;hora&gt;/&lt;codigo&gt;/</td>
                         <td><code>{"result": [{"id": trajeto_id, "inicio": codigo_inicio, "final": codigo_final, "data_inicio": data_inicio, "data_final": data_final, "velocidade_media": velocidade_media(km/h)}, ..]}</code></td>
                     </tr>
                     <tr>
                         <td>getTrajetos</td>
                         <td> viagem_id </td>
-                        <td id="get_viagens_container">{{hostname}}getViagens/&lt;viagem_id&gt;/</td>
+                        <td id="get_viagens_container">{{hostname}}getTrajetos/&lt;viagem_id&gt;/</td>
                         <td><code>{"result": [{"id": viagem_id, "inicio": codigo_inicio, "final": codigo_final, "data_inicio": data_inicio, "data_final": data_final, "velocidade_media": velocidade_media(km/h)}, ...]}</code></td>
                     </tr>
                     <tr class="w3-white">
                         <td>getDetalhes</td>
                         <td>Código</td>
                         <td id="get_detalhes_container">{{hostname}}getDetalhes/&lt;codigo&gt;/</td>
-                        <td><code>{"codigo": codigo, "lote": numero_do_lote, "endereco": endereco, "sentido": sentido, "referencia": referencia, "tipo_equip": tipo_de_equipamento, "enquadramento": enquadramento(s), "faixas": numero_de_faixas, "velocidade": velocidade_estipulada, "velocidade_cam_oni": velocidade_pesados, "velocidade_carro_moto": velocidade_leves, "bairro": bairro, "data_publicacao": inaugurado, "latitude": y, "longitude": x}, ...]}</code></td>
+                        <td><code>{"codigo": codigo, "lote": numero_do_lote, "endereco": endereco, "sentido": sentido, "referencia": referencia, "tipo_equip": tipo_de_equipamento, "enquadramento": enquadramento(s), "faixas": numero_de_faixas, "velocidade": velocidade_estipulada, "velocidade_cam_oni": velocidade_pesados, "velocidade_carro_moto": velocidade_leves, "bairro": bairro, "data_publicacao": inaugurado, "latitude": y, "longitude": x}</code></td>
                     </tr>
                     <tr>
                         <td>getContagens</td>
@@ -96,8 +96,14 @@
                     <tr class="w3-white">
                         <td>getVelocidades</td>
                         <td>Código</td>
-                        <td id="get_velocidades_container">{{hostname}}getDetalhes/&lt;YYYY-MM-DD&gt;/&lt;codigo&gt;/</td>
+                        <td id="get_velocidades_container">{{hostname}}getVelocidades/&lt;YYYY-MM-DD&gt;/&lt;hora&gt;/&lt;codigo&gt;/</td>
                         <td><code>{"result": [{"velocidade": velocidade(km/h), "tipo": tipo, "data_e_hora": hora}, ... ]}</code></td>
+                    </tr>
+                    <tr>
+                        <td>getDistancia</td>
+                        <td>Código, Código</td>
+                        <td id="get_distancia_container">{{hostname}}getDistancia/&lt;A&gt;/&lt;B&gt;/</td>
+                        <td><code>{"origem": codigo, "destino": codigo, "dist": distancia, "geom": geometria ewkt}</code></td>
                     </tr>
                   </tbody>
                 </table>
@@ -280,11 +286,11 @@
             if(d=="") d='&lt;YYYY-MM-DD&gt;';
             if(e=="") e='&lt;codigo&gt;';
             $("#get_locais_container").html('{{hostname}}getLocais/'+d+'/');
-            $("#get_trajetos_container").html('{{hostname}}getTrajetos/'+d+'/'+e+'/');
-            $("#get_viagens_container").html('{{hostname}}getViagens/'+d+'/'+e+'/');
+            $("#get_trajetos_container").html('{{hostname}}getTrajetos/'+d+'/&lt;hora&gt;/'+e+'/');
+            $("#get_viagens_container").html('{{hostname}}getViagens/'+d+'/&lt;hora&gt;/'+e+'/');
             $("#get_contagens_container").html('{{hostname}}getContagens/'+d+'/'+e+'/');
             $("#get_detalhes_container").html('{{hostname}}getDetalhes/'+e+'/');
-            $("#get_velocidades_container").html('{{hostname}}getVelocidades/'+d+'/'+e+'/');
+            $("#get_velocidades_container").html('{{hostname}}getVelocidades/'+d+'/&lt;hora&gt;/'+e+'/');
         }
         $("#datepicker, #radar").change(setUrls);
         var mybtn = document.getElementsByClassName("testbtn")[0];

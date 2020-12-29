@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from radar import settings
 from django.core.cache import cache
-import uuid, re
+import uuid, re, pytz
 from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import redirect
 from rest_framework.authtoken.models import Token
@@ -21,7 +21,7 @@ from rest_framework.decorators import api_view, throttle_classes
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 
-def validate_fields(codigo,data):
+def validate_fields(codigo,data, hora):
     try:
         val = int(codigo)
     except ValueError:
@@ -32,6 +32,13 @@ def validate_fields(codigo,data):
         raise APIException("Erro de validação: Data")
     except TypeError:
         raise APIException("Erro de validação: Data")
+    try:
+        h = int(hora)
+    except ValueError:
+        raise APIException('Erro de validação: Hora')
+    if h<0 or h>23:
+        raise APIException('Erro de validação: Hora')
+    
     radar=Radar.objects.filter(codigo__contains=codigo)
     if len(radar)==0:
         raise APIException("Erro de validação: Código não existe")
@@ -122,16 +129,21 @@ def get_locais(request):
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
 def get_viagens(request, codigo, data):
+    return get_viagens_hora(request._request,codigo,data,"8")
+
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
+def get_viagens_hora(request, codigo, data, hora):
     if not request.user.is_authenticated:
         user=TokenAuthentication().authenticate(request)
         if user is None:
             return HttpResponse(status=401)
-    validate_fields(codigo, data)
-    dt=datetime.datetime(*[int(item) for item in data.split('-')])
+    validate_fields(codigo, data, hora)
+    dt=datetime.datetime(*[int(item) for item in data.split('-')]+[int(hora), 0, 0, 0, pytz.timezone('UTC')])
     radar=Radar.objects.filter(codigo__contains=codigo)
     if len(radar)==0:
         raise APIException("Erro de validação: Código não existe")
-    ds=dt+datetime.timedelta(days=1)
+    ds=dt+datetime.timedelta(hours=1)
     query=Q(origem=codigo)
     query.add(Q(data_inicio__gt=dt), Q.AND)
     query.add(Q(data_inicio__lte=ds), Q.AND)
@@ -145,6 +157,14 @@ def get_viagens(request, codigo, data):
     for v in trips:
         if not v.viagem_id in viagens:
             viagens[v.viagem_id]=v.viagem
+            viagens[v.viagem_id].data_inicio=v.data_inicio
+            viagens[v.viagem_id].data_final=v.data_final
+        else:
+            if v.data_inicio < viagens[v.viagem_id].data_inicio:
+                viagens[v.viagem_id].data_inicio=v.data_inicio
+            if v.data_final > viagens[v.viagem_id].data_final:
+                viagens[v.viagem_id].data_final=v.data_final
+            
     res=[{"id":viagens[c].id, "data_inicio":viagens[c].data_inicio, "data_final":viagens[c].data_final} for c in viagens.keys()]
     return JsonResponse({"result":res, "total":len(res)})
 
@@ -249,18 +269,22 @@ def reverse_geocode(x,y):
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
 def get_trajetos(request, codigo, data):
+    return get_trajetos_hora(request._request, codigo, data, "8")
+
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
+def get_trajetos_hora(request, codigo, data, hora):
     if not request.user.is_authenticated:
         user=TokenAuthentication().authenticate(request)
         if user is None:
             return HttpResponse(status=401)
-    v=validate_fields(codigo,data)
-
-    dt=datetime.datetime(*[int(item) for item in data.split('-')])
+    v=validate_fields(codigo,data,hora)
     radar=Radar.objects.filter(codigo__contains=codigo)
     if len(radar)==0:
         raise APIException("Erro de validação: Código não existe")
-    dt=datetime.datetime(*[int(item) for item in data.split('-')])
-    ds=dt+datetime.timedelta(days=1)
+    dt=datetime.datetime(*[int(item) for item in data.split('-')]+[int(hora), 0, 0, 0, pytz.timezone('UTC')])
+    dt=dt.replace(hour=int(hora))
+    ds=dt+datetime.timedelta(hours=1)
     query=Q(origem=codigo)
     query.add(Q(data_inicio__gt=dt), Q.AND)
     query.add(Q(data_inicio__lte=ds), Q.AND)
@@ -303,18 +327,54 @@ def get_trajetos(request, codigo, data):
 
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
-def get_velocidades(request, data, codigo):
+def get_distancia(request, a, b):
     if not request.user.is_authenticated:
         user=TokenAuthentication().authenticate(request)
         if user is None:
             return HttpResponse(status=401)
-    validate_fields(codigo,data)
+    try:
+        val = int(a)
+        val = int(b)
+    except ValueError:
+        raise APIException('Erro de validação: Código')
+    rt=Route.objects.filter(origem=a,destino=b)
+    if len(rt)>0:
+        return JsonResponse({"dist":rt[0].dist, "origem":a, "destino":b, "geom":rt[0].geom.ewkt})
+    local_origem=get_local(a)
+    local_destino=get_local(b)
+    if local_origem is not None and local_destino  is not None:
+        k=roteirize(local_origem, local_destino)
+        rt=Route(origem=a, destino=b, geom=k)
+        rt.save()
+        from django.db import connection
+        with connection.cursor() as c:
+            c.execute("update route set dist=st_length(st_transform(geom, 32723)) where origem=%s and destino=%s" % (a, b))
+        rt.refresh_from_db()
+        return JsonResponse({"dist":rt.dist, "origem":a, "destino":b, "geom":rt.geom.ewkt})
+    else:
+        return HttpResponse(status=400)                       
+
+
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
+def get_velocidades(request, data, codigo):
+    return get_velocidades_hora(request, data, "8", codigo)
+
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
+def get_velocidades_hora(request, data, hora, codigo):
+    if not request.user.is_authenticated:
+        user=TokenAuthentication().authenticate(request)
+        if user is None:
+            return HttpResponse(status=401)
+    validate_fields(codigo,data,hora)
     radar=Radar.objects.filter(codigo__contains=codigo)
     if len(radar)==0:
         return HttpResponse(status=400)
     r=radar[0]
     dt=datetime.datetime(*[int(item) for item in data.split('-')])
-    ds=dt+datetime.timedelta(days=1)
+    dt=dt.replace(hour=hora)
+    ds=dt+datetime.timedelta(hours=1)
 
     spds=[]
     query=Q(origem=codigo)
