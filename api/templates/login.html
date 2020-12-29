@@ -115,12 +115,12 @@ $( document ).ready(function() {
       $("#login_form input[name=email]").focus();
       return;
     }
-    $.ajax('/reset-password/'+$("#login_form input[name=email]").val()+'/', {success:function(data){
-      console.log("Retorno");
-      console.log(data);
-    },error:function(data){
-      alert("Usuário não encontrado.");
-    }});
+    $.ajax('/accounts/password_reset/', {method:'POST', data:{email:$("#login_form input[name=email]").val(),csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()},
+      success:function(data){
+        $("#message_board").html("Um link para a redefinição de senha foi enviado para "+$("#login_form input[name=email]").val());
+      },error:function(data){
+        alert("Usuário não encontrado.");
+      }});
   });
 });
 </script>
