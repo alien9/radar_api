@@ -23,6 +23,5 @@ urlpatterns = [
     path('getVelocidades/<data>/<codigo>/', views.get_velocidades),
     path('reset-password/<email>/', views.reset_password),
    	path('getDatas/', views.get_datas),
-   	path('verification/', include('verify_email.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
 ]
