@@ -11,7 +11,7 @@
     <div class="city w3-container" id="login">
       <div class="w3-row-padding">
           <div class="w3-half">
-          <form class="w3-container w3-card-4" method="POST">{% csrf_token %}
+          <form class="w3-container w3-card-4" id="login_form" method="POST">{% csrf_token %}
             <h2>Identificação</h2>
             <div class="w3-section">      
               <input class="w3-input" type="text" required="" name="email">
@@ -29,6 +29,9 @@
             </div>
             <div class="w3-section">
               <a href="/signup/">Criar um acesso</a>
+            </div>
+            <div class="w3-section">
+              <a href="javascript:void(0);" class="forgot">Esqueci minha senha</a>
             </div>
           </form>
           </div>
@@ -106,6 +109,19 @@ $( document ).ready(function() {
     localStorage.removeItem('message');
   }
   $("#inicio-bt").click();
+  $('.forgot').click(function(){
+    if(!$("#login_form input[name=email]").val()){
+      alert('Preencha o campo com seu email');
+      $("#login_form input[name=email]").focus();
+      return;
+    }
+    $.ajax('/reset-password/'+$("#login_form input[name=email]").val()+'/', {success:function(data){
+      console.log("Retorno");
+      console.log(data);
+    },error:function(data){
+      alert("Usuário não encontrado.");
+    }});
+  });
 });
 </script>
 {% endblock %}

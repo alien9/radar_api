@@ -18,6 +18,8 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, throttle_classes
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 
 def validate_fields(codigo,data):
     try:
@@ -275,7 +277,7 @@ def get_trajetos(request, codigo, data):
         if len(r)>0:
             dist=r[0].dist
         
-        if dist is None or (r[0].geom is None and 'recalculate' in request.GET):
+        if (dist is None or r[0].geom is None) and 'recalculate' in request.GET:
             local_origem=get_local(v.origem)
             local_destino=get_local(v.destino)
             if local_origem is not None and local_destino  is not None:
@@ -291,13 +293,12 @@ def get_trajetos(request, codigo, data):
                 from django.db import connection
                 with connection.cursor() as c:
                     c.execute("update route set dist=st_length(st_transform(geom, 32723)) where origem=%s and destino=%s" % (v.origem, v.destino))
-
-            
+                           
         if dist is not None:
             t=(v.data_final-v.data_inicio).total_seconds()
             if t > 0:
                 vm=round(float(dist)/float(t)*3.6)
-            res.append({"id":v.id, "inicio":v.origem, "final":v.destino, "data_inicio":v.data_inicio, "data_final":v.data_final, "velocidade_media":vm, "distancia":dist})
+        res.append({"id":v.id, "inicio":v.origem, "final":v.destino, "data_inicio":v.data_inicio, "data_final":v.data_final, "velocidade_media":vm, "distancia":dist})
     return JsonResponse({"result":res, "total":len(res)})
 
 @api_view(['GET'])
@@ -415,8 +416,6 @@ def api_logout(request):
     logout(request)
     return redirect('/')
 
-@api_view(['GET'])
-@throttle_classes([UserRateThrottle])
 def signup(request):
     if request.method=='GET':
         return render(request, 'signup.html')
@@ -426,7 +425,7 @@ def signup(request):
         u=User.objects.filter(email=request.POST['email'])
         if u.count():
             return JsonResponse({"mess": "Usuário já existe", "status":"401"})
-        u=User(email=request.POST['email'], username=request.POST['email'], is_active=False)
+        u=User(first_name=request.POST['name'], email=request.POST['email'], username=request.POST['email'], is_active=False)
         u.set_password(request.POST['senha'])
 
         u.save()
@@ -459,3 +458,12 @@ def validate(request, signup_token):
         u.save()
         return render(request, 'validate.html', {'message':mess, 'username':u.username})
     return render(request, 'validate.html', {'message':mess, 'username':""})
+
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
+def reset_password(request, email):
+    try:
+        u=User.objects.get(email=email)
+    except ObjectDoesNotExist as ex:
+        raise Http404
+    return JsonResponse({"mess": "Um link para alteração da senha foi enviado para %s" % email, "status":"200"})

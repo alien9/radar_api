@@ -15,6 +15,7 @@ services:
       - STATIC_ROOT=${STATIC_ROOT}
       - STATIC_URL=${STATIC_URL}
       - QUOTA=${QUOTA}
+      - MEMCACHED=${MEMCACHED}
     network_mode: "host"
     ports:
       - "4000:4000"

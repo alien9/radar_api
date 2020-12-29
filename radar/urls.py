@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import path
 from api import views
+from django.conf.urls import include
+import debug_toolbar
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -20,5 +22,9 @@ urlpatterns = [
     path('getDetalhes/<codigo>/', views.get_detalhes),
     path('getContagens/<data>/<codigo>/', views.get_contagens),
     path('getVelocidades/<data>/<codigo>/', views.get_velocidades),
-    path('getDatas/', views.get_datas),
+    path('reset-password/<email>/', views.reset_password),
+   	path('getDatas/', views.get_datas),
+   	path('verification/', include('verify_email.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('__debug__/', include(debug_toolbar.urls)),
 ]
