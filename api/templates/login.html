@@ -4,7 +4,7 @@
 <div class="w3-border">
   <div class="w3-bar w3-theme">
       <button class="w3-bar-item w3-button testbtn w3-padding-16" onclick="openCity(event,'inicio')" id="inicio-bt">Início</button>
-      <button class="w3-bar-item w3-button testbtn w3-padding-16" onclick="openCity(event,'login')" id="login-bt">Entrar</button>
+      <button class="w3-bar-item w3-button testbtn w3-padding-16" id="initial" onclick="openCity(event,'login')" id="login-bt">Entrar</button>
       <button class="w3-bar-item w3-button testbtn w3-padding-16" onclick="openCity(event,'galeria');" id="galeria-bt">Galeria</button>
   </div>
     <br>
@@ -108,7 +108,9 @@ $( document ).ready(function() {
     $("#message_board").html(mess);
     localStorage.removeItem('message');
   }
-  $("#inicio-bt").click();
+  if($("#message_board").html().length){
+    $("#inicial").click();
+  }
   $('.forgot').click(function(){
     if(!$("#login_form input[name=email]").val()){
       alert('Preencha o campo com seu email');
