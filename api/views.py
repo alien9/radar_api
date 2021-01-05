@@ -440,7 +440,7 @@ def get_contagens(request, data, codigo):
         user=TokenAuthentication().authenticate(request)
         if user is None:
             return HttpResponse(status=401)
-    validate_fields(codigo,data)
+    validate_fields(codigo,data,"1")
     radar=Radar.objects.filter(codigo__contains=codigo)
     if len(radar)==0:
         return HttpResponse(status=400)
